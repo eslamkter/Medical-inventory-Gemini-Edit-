@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ===== TRANSFER REQUEST (Stock Request) ===== -->
+    <record id="view_transfer_request_form" model="ir.ui.view">
+        <field name="name">medical.transfer.request.form</field>
+        <field name="model">medical.consumption.request</field>
+        <field name="arch" type="xml">
+            <form string="Stock Transfer Request">
+                <header>
+                    <button name="action_submit" string="Submit Request"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve"
+                            type="object" class="btn-success"
+                            groups="base.group_system"
+                            invisible="state != 'submitted'"/>
+                    <button name="action_reject" string="Reject"
+                            type="object" groups="base.group_system"
+                            invisible="state != 'submitted'"/>
+                    <button name="action_process_stock"
+                            string="Process &amp; Transfer Stock"
+                            type="object" class="btn-primary"
+                            groups="base.group_system"
+                            invisible="state != 'approved'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ['done','cancelled']"/>
+                    <button name="action_reset_draft" string="Reset to Draft"
+                            type="object"
+                            invisible="state not in ['cancelled','rejected']"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <div class="alert alert-info" role="alert">
+                        <strong>📦 Transfer Request:</strong>
+                        Use this to request items from the main store or warehouse to be sent to a clinic.
+                        Stock will move from the source to the destination clinic.
+                    </div>
+                    <group>
+                        <group string="Request Details">
+                            <field name="request_type" invisible="1"/>
+                            <field name="date_request" readonly="state != 'draft'"/>
+                            <field name="requested_by" readonly="state != 'draft'"/>
+                            <field name="department_location_id"
+                                   string="Deliver To (Clinic)"
+                                   readonly="state != 'draft'"/>
+                            <field name="source_location_id"
+                                   string="Take From (Store/Warehouse)"
+                                   required="1"
+                                   readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Approval Info">
+                            <field name="approved_by" readonly="1"/>
+                            <field name="date_approved" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Items Requested">
+                            <field name="line_ids" readonly="state not in ['draft']">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="product_uom_id" string="Unit"/>
+                                    <field name="available_qty"
+                                           string="Available in Store" readonly="1"/>
+                                    <field name="notes" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes" readonly="state != 'draft'"
+                                   placeholder="Reason, urgency level, notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Transfer Request List -->
+    <record id="view_transfer_request_list" model="ir.ui.view">
+        <field name="name">medical.transfer.request.list</field>
+        <field name="model">medical.consumption.request</field>
+        <field name="arch" type="xml">
+            <list string="Transfer Requests"
+                  decoration-success="state == 'done'"
+                  decoration-warning="state == 'submitted'"
+                  decoration-danger="state == 'rejected'">
+                <field name="name"/>
+                <field name="date_request"/>
+                <field name="requested_by"/>
+                <field name="source_location_id" string="From"/>
+                <field name="department_location_id" string="To (Clinic)"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-warning="state == 'submitted'"
+                       decoration-info="state == 'approved'"
+                       decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_transfer_request_search" model="ir.ui.view">
+        <field name="name">medical.transfer.request.search</field>
+        <field name="model">medical.consumption.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="requested_by"/>
+                <field name="department_location_id"/>
+                <filter string="Awaiting Approval" name="submitted"
+                        domain="[('state','=','submitted')]"/>
+                <filter string="Approved" name="approved"
+                        domain="[('state','=','approved')]"/>
+                <filter string="Done" name="done"
+                        domain="[('state','=','done')]"/>
+                <separator/>
+                <filter string="By Clinic" name="group_clinic"
+                        context="{'group_by': 'department_location_id'}"/>
+                <filter string="By Status" name="group_state"
+                        context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_transfer_request" model="ir.actions.act_window">
+        <field name="name">Transfer Requests</field>
+        <field name="res_model">medical.consumption.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids"
+               eval="[(5,0,0),
+                      (0,0,{'view_mode':'list','view_id':ref('view_transfer_request_list')}),
+                      (0,0,{'view_mode':'form','view_id':ref('view_transfer_request_form')})]"/>
+        <field name="search_view_id" ref="view_transfer_request_search"/>
+        <field name="domain">[('request_type','=','transfer')]</field>
+        <field name="context">{'default_request_type': 'transfer'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No transfer requests yet</p>
+            <p>Use this to request stock from the main store to be sent to a clinic.</p>
+        </field>
+    </record>
+
+
+    <!-- ===== CONSUMPTION REQUEST ===== -->
+    <record id="view_consumption_request_form" model="ir.ui.view">
+        <field name="name">medical.consumption.request.form</field>
+        <field name="model">medical.consumption.request</field>
+        <field name="arch" type="xml">
+            <form string="Consumption Report">
+                <header>
+                    <button name="action_submit" string="Submit Report"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve"
+                            type="object" class="btn-success"
+                            groups="base.group_system"
+                            invisible="state != 'submitted'"/>
+                    <button name="action_reject" string="Reject"
+                            type="object" groups="base.group_system"
+                            invisible="state != 'submitted'"/>
+                    <button name="action_process_stock"
+                            string="Confirm Consumption &amp; Reduce Stock"
+                            type="object" class="btn-primary"
+                            groups="base.group_system"
+                            invisible="state != 'approved'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ['done','cancelled']"/>
+                    <button name="action_reset_draft" string="Reset to Draft"
+                            type="object"
+                            invisible="state not in ['cancelled','rejected']"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <div class="alert alert-warning" role="alert">
+                        <strong>📉 Consumption Report:</strong>
+                        Report items that have been used or consumed in this clinic.
+                        This will reduce the stock quantity in the selected clinic.
+                    </div>
+                    <group>
+                        <group string="Report Details">
+                            <field name="request_type" invisible="1"/>
+                            <field name="date_request" readonly="state != 'draft'"/>
+                            <field name="requested_by" readonly="state != 'draft'"/>
+                            <field name="department_location_id"
+                                   string="Clinic / Department"
+                                   readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Approval Info">
+                            <field name="approved_by" readonly="1"/>
+                            <field name="date_approved" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Items Consumed">
+                            <field name="line_ids" readonly="state not in ['draft']">
+                                <list editable="bottom">
+                                    <field name="product_id"
+                                           domain="[('id', 'in', parent.available_product_ids)]"/>
+                                    <field name="quantity" string="Qty Consumed"/>
+                                    <field name="product_uom_id" string="Unit"/>
+                                    <field name="available_qty"
+                                           string="Available in Clinic" readonly="1"/>
+                                    <field name="notes" optional="show"/>
+                                </list>
+                            </field>
+                            <div class="text-muted" style="font-size:12px;padding:8px 0;">
+                                <i>Only products currently in stock in this clinic are shown.</i>
+                            </div>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes" readonly="state != 'draft'"
+                                   placeholder="Notes about the consumption..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Consumption List -->
+    <record id="view_consumption_request_list" model="ir.ui.view">
+        <field name="name">medical.consumption.request.list</field>
+        <field name="model">medical.consumption.request</field>
+        <field name="arch" type="xml">
+            <list string="Consumption Reports"
+                  decoration-success="state == 'done'"
+                  decoration-warning="state == 'submitted'"
+                  decoration-danger="state == 'rejected'">
+                <field name="name"/>
+                <field name="date_request"/>
+                <field name="requested_by"/>
+                <field name="department_location_id" string="Clinic"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-warning="state == 'submitted'"
+                       decoration-info="state == 'approved'"
+                       decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_consumption_request_search" model="ir.ui.view">
+        <field name="name">medical.consumption.request.search</field>
+        <field name="model">medical.consumption.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="requested_by"/>
+                <field name="department_location_id"/>
+                <filter string="Awaiting Approval" name="submitted"
+                        domain="[('state','=','submitted')]"/>
+                <filter string="Done" name="done"
+                        domain="[('state','=','done')]"/>
+                <separator/>
+                <filter string="By Clinic" name="group_clinic"
+                        context="{'group_by': 'department_location_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_consumption_request" model="ir.actions.act_window">
+        <field name="name">Consumption Reports</field>
+        <field name="res_model">medical.consumption.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids"
+               eval="[(5,0,0),
+                      (0,0,{'view_mode':'list','view_id':ref('view_consumption_request_list')}),
+                      (0,0,{'view_mode':'form','view_id':ref('view_consumption_request_form')})]"/>
+        <field name="search_view_id" ref="view_consumption_request_search"/>
+        <field name="domain">[('request_type','=','consumption')]</field>
+        <field name="context">{'default_request_type': 'consumption'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No consumption reports yet</p>
+            <p>Report items used in a clinic to keep stock levels accurate.</p>
+        </field>
+    </record>
+
+</odoo>

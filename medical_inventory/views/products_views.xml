@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_medical_product_kanban" model="ir.ui.view">
+        <field name="name">product.product.kanban</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="lst_price"/>
+                <field name="qty_available"/>
+                <field name="default_code"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click d-flex align-items-center" style="min-height: 90px; padding: 10px;">
+                            <div class="o_kanban_image me-3">
+                                <img t-att-src="'/web/image/product.product/' + record.id.raw_value + '/image_128'"
+                                     alt="Product"
+                                     class="o_image_64_contain"
+                                     style="border-radius: 8px; background: #f8f9fa;"/>
+                            </div>
+                            <div class="oe_kanban_details d-flex flex-column">
+                                <strong class="o_kanban_record_title" style="font-size: 15px; color: #1a2744;">
+                                    <field name="name"/>
+                                </strong>
+                                <div class="text-muted small">
+                                    <t t-if="record.default_code.value">[<field name="default_code"/>]</t>
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge rounded-pill text-bg-info text-white" style="font-size: 11px;">
+                                        Price: <field name="lst_price"/>
+                                    </span>
+                                </div>
+                                <div class="mt-2">
+                                    <span t-attf-class="fw-bold #{record.qty_available.raw_value &lt; 5 ? 'text-danger' : 'text-success'}" style="font-size: 13px;">
+                                        Stock: <field name="qty_available"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_medical_products_list" model="ir.ui.view">
+        <field name="name">medical.products.list</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <list string="Products"
+                  decoration-warning="type == 'consu'"
+                  decoration-danger="type == 'service'">
+                <field name="default_code" string="Ref" optional="show"/>
+                <field name="name" string="Product Name"/>
+                <field name="categ_id" string="Category" optional="show"/>
+                <field name="uom_id" string="Unit"/>
+                <field name="standard_price" string="Cost Price"/>
+                <field name="type" string="Product Type" widget="badge"
+                       decoration-success="type in ('product', 'storable')"
+                       decoration-warning="type == 'consu'"
+                       decoration-danger="type == 'service'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_medical_products_search" model="ir.ui.view">
+        <field name="name">medical.products.search</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <search string="Search Products">
+                <field name="name"/>
+                <field name="default_code"/>
+                <field name="categ_id"/>
+                <filter string="✅ Storable (tracked in stock)" name="storable"
+                        domain="[('type','in',['product','storable'])]"/>
+                <filter string="⚠️ Consumable (NOT tracked)" name="consumable"
+                        domain="[('type','=','consu')]"/>
+                <separator/>
+                <filter string="By Category" name="group_categ"
+                        context="{'group_by': 'categ_id'}"/>
+                <filter string="By Type" name="group_type"
+                        context="{'group_by': 'type'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_medical_products" model="ir.actions.act_window">
+        <field name="name">Products</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_id" ref="view_medical_product_kanban"/>
+        <field name="search_view_id" ref="view_medical_products_search"/>
+        <field name="domain">[('type', 'in', ['product', 'consu'])]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No products yet</p>
+        </field>
+    </record>
+
+</odoo>

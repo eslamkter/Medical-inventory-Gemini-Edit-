@@ -1,0 +1,202 @@
+.o_stock_view {
+    padding: 24px;
+    background: #f0f2f5;
+    /* التعديل هنا: */
+    height: 100%;
+    overflow-y: auto !important; /* تفعيل التمرير العمودي */
+    display: block;
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Loading */
+.o_sv_loading {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; height: 300px; color: #666; gap: 12px;
+}
+.o_sv_spinner {
+    width: 36px; height: 36px; border: 4px solid #ddd;
+    border-top-color: #0a5fa8; border-radius: 50%;
+    animation: sv_spin 0.7s linear infinite;
+}
+@keyframes sv_spin { to { transform: rotate(360deg); } }
+
+/* Top bar */
+.o_sv_topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+}
+.o_sv_title h1 {
+    font-size: 22px; font-weight: 800; color: #0d1b2a; margin: 0 0 3px;
+    letter-spacing: -0.5px;
+}
+.o_sv_subtitle { font-size: 13px; color: #64748b; }
+.o_sv_topactions { display: flex; gap: 10px; }
+.o_sv_btn_primary {
+    padding: 9px 18px; background: #0a5fa8; color: white;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+}
+.o_sv_btn_primary:hover { background: #084d8a; transform: translateY(-1px); }
+.o_sv_btn_secondary {
+    padding: 9px 18px; background: white; color: #0a5fa8;
+    border: 2px solid #0a5fa8; border-radius: 8px; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.o_sv_btn_secondary:hover { background: #eff6ff; transform: translateY(-1px); }
+
+/* Summary strips */
+.o_sv_strips {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin-bottom: 16px;
+}
+.o_sv_strip {
+    border-radius: 10px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.o_strip_blue   { background: linear-gradient(135deg, #0a5fa8, #1e90d4); }
+.o_strip_teal   { background: linear-gradient(135deg, #0d7a6b, #14b8a6); }
+.o_strip_green  { background: linear-gradient(135deg, #166534, #22c55e); }
+.o_strip_purple { background: linear-gradient(135deg, #4c1d95, #8b5cf6); }
+.o_strip_val { font-size: 24px; font-weight: 800; color: white; }
+.o_strip_lbl { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; }
+
+/* Category pills */
+.o_sv_cats {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px;
+}
+.o_sv_cat_pill {
+    background: white; border-radius: 20px; padding: 6px 16px;
+    display: flex; gap: 10px; align-items: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid #e2e8f0;
+    font-size: 12px;
+}
+.o_cat_name { font-weight: 700; color: #334155; }
+.o_cat_qty { color: #0a5fa8; font-weight: 600; }
+.o_cat_val { color: #166534; font-weight: 600; }
+
+/* Toolbar */
+.o_sv_toolbar {
+    display: flex; gap: 10px; align-items: center;
+    background: white; padding: 12px 16px; border-radius: 10px;
+    margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    flex-wrap: wrap;
+}
+.o_sv_search_wrap {
+    display: flex; align-items: center; gap: 8px; flex: 1;
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 6px 12px; min-width: 220px;
+}
+.o_sv_search_ico { font-size: 14px; }
+.o_sv_search {
+    border: none; background: transparent; outline: none;
+    font-size: 13px; color: #334155; width: 100%;
+}
+.o_sv_select {
+    padding: 7px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+    font-size: 13px; color: #334155; background: #f8fafc;
+    cursor: pointer; outline: none;
+}
+.o_sv_view_toggle { display: flex; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+.o_sv_toggle_btn {
+    padding: 7px 14px; border: none; background: #f8fafc;
+    font-size: 12px; font-weight: 600; color: #64748b;
+    cursor: pointer; transition: all 0.15s;
+}
+.o_sv_toggle_btn.active { background: #0a5fa8; color: white; }
+
+/* Location block */
+.o_sv_location_block { margin-bottom: 24px; }
+.o_sv_loc_header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 18px; background: #0d1b2a; border-radius: 10px 10px 0 0;
+}
+.o_sv_loc_title { display: flex; align-items: center; gap: 8px; }
+.o_sv_loc_icon { font-size: 16px; }
+.o_sv_loc_name { font-size: 15px; font-weight: 700; color: white; }
+.o_sv_loc_meta { display: flex; gap: 16px; align-items: center; }
+.o_sv_loc_stat { font-size: 12px; color: rgba(255,255,255,0.7); }
+.o_stat_qty { color: #7dd3fc !important; font-weight: 600; }
+.o_stat_val { color: #86efac !important; font-weight: 600; }
+
+/* Cards grid */
+.o_sv_cards_grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1px; background: #e2e8f0; border: 1px solid #e2e8f0;
+    border-top: none; border-radius: 0 0 10px 10px; overflow: hidden;
+}
+.o_sv_card {
+    background: white; padding: 14px;
+    transition: background 0.15s;
+    position: relative;
+}
+.o_sv_card:hover { background: #f8fafc; }
+.o_card_good   { border-left: 3px solid #22c55e; }
+.o_card_low    { border-left: 3px solid #f59e0b; }
+.o_card_critical{ border-left: 3px solid #ef4444; }
+.o_card_empty  { border-left: 3px solid #94a3b8; background: #fafafa; }
+
+.o_card_top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.o_card_cat { font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.o_card_status {
+    font-size: 9px; font-weight: 700; padding: 2px 6px;
+    border-radius: 10px; white-space: nowrap;
+}
+.o_status_good     { background: #dcfce7; color: #166534; }
+.o_status_low      { background: #fef3c7; color: #92400e; }
+.o_status_critical { background: #fee2e2; color: #991b1b; }
+.o_status_empty    { background: #f1f5f9; color: #64748b; }
+
+.o_card_name { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 3px; line-height: 1.3; }
+.o_card_ref  { font-size: 10px; color: #94a3b8; margin-bottom: 8px; }
+.o_card_bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9; }
+.o_qty_num { font-size: 20px; font-weight: 800; color: #0a5fa8; }
+.o_qty_unit { font-size: 10px; color: #94a3b8; margin-left: 3px; }
+.o_card_val { font-size: 11px; font-weight: 700; color: #166534; }
+
+/* Table */
+.o_sv_table {
+    width: 100%; border-collapse: collapse;
+    background: white; border-radius: 0 0 10px 10px;
+    overflow: hidden; font-size: 13px;
+}
+.o_sv_table thead tr { background: #1e293b; }
+.o_sv_table thead th {
+    padding: 11px 14px; text-align: left; font-size: 11px;
+    font-weight: 700; color: rgba(255,255,255,0.8); letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.o_sv_table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.1s; }
+.o_sv_table tbody tr:hover { background: #f8fafc; }
+.o_tr_critical { background: #fff5f5 !important; }
+.o_tr_empty    { background: #fafafa !important; color: #94a3b8; }
+.o_sv_table td { padding: 10px 14px; }
+.o_td_name { font-weight: 600; color: #1e293b; max-width: 220px; }
+.o_td_ref  { font-size: 11px; color: #94a3b8; font-family: monospace; }
+.o_td_qty  { font-weight: 700; color: #0a5fa8; font-size: 14px; }
+.o_td_num  { color: #475569; }
+.o_td_val  { font-weight: 700; color: #166534; }
+.o_tfoot td { background: #f8fafc; padding: 10px 14px; border-top: 2px solid #e2e8f0; }
+
+.o_tbl_badge {
+    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px;
+    white-space: nowrap;
+}
+.o_tbadge_good     { background: #dcfce7; color: #166534; }
+.o_tbadge_low      { background: #fef3c7; color: #92400e; }
+.o_tbadge_critical { background: #fee2e2; color: #991b1b; }
+.o_tbadge_empty    { background: #f1f5f9; color: #64748b; }
+
+/* Empty state */
+.o_sv_empty {
+    text-align: center; padding: 60px; color: #94a3b8;
+    background: white; border-radius: 10px;
+}
+.o_sv_empty p { font-size: 16px; font-weight: 600; color: #334155; margin: 10px 0 4px; }
+.o_sv_empty small { font-size: 13px; }
+
+@media (max-width: 1024px) {
+    .o_sv_strips { grid-template-columns: repeat(2, 1fr); }
+    .o_sv_cards_grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+}

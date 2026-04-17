@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_medical_vendor_list" model="ir.ui.view">
+        <field name="name">medical.vendor.list</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list string="Vendors">
+                <field name="name" string="Vendor Name"/>
+                <field name="phone" optional="show"/>
+                <field name="email" optional="show"/>
+                <field name="city" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_medical_vendors" model="ir.actions.act_window">
+        <field name="name">Vendors</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_company', '=', True)]</field>
+        <field name="context">{'default_is_company': True}</field>
+    </record>
+
+    <record id="view_stock_receive_form" model="ir.ui.view">
+        <field name="name">medical.stock.receive.form</field>
+        <field name="model">medical.stock.receive</field>
+        <field name="arch" type="xml">
+            <form string="Receive Stock">
+                <header>
+                    <button name="action_receive" string="Confirm &amp; Add to Inventory"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"
+                            confirm="This will add all items to your inventory. Are you sure?"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ['done', 'cancelled']"/>
+                    <button name="action_reset_draft" string="Reset to Draft" type="object"
+                            invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Receipt Details">
+                            <field name="date_receive" readonly="state != 'draft'"/>
+                            <field name="received_by" readonly="state != 'draft'"/>
+                            <field name="destination_location_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Vendor Information">
+                            <field name="vendor_id" readonly="state != 'draft'"/>
+                            <field name="vendor_invoice_ref" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Items Received">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="unit_price"/>
+                                    <field name="subtotal" readonly="1" sum="Total"/>
+                                    <field name="lot_id" optional="show"/>
+                                    <field name="expiry_date" optional="show"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="total_value" string="Grand Total" widget="monetary" style="font-size: 1.3em; font-weight: bold;"/>
+                            </group>
+                            <div class="clearfix"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_stock_receive_list" model="ir.ui.view">
+        <field name="name">medical.stock.receive.list</field>
+        <field name="model">medical.stock.receive</field>
+        <field name="arch" type="xml">
+            <list string="Stock Receipts">
+                <field name="name"/>
+                <field name="date_receive"/>
+                <field name="vendor_id"/>
+                <field name="total_value" sum="Total Receipts Value"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-danger="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_stock_receive" model="ir.actions.act_window">
+        <field name="name">Receive Stock</field>
+        <field name="res_model">medical.stock.receive</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
