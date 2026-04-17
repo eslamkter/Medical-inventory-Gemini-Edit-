@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="assets_backend" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/medical_inventory/static/src/js/dashboard.js"/>
+            <link rel="stylesheet" href="/medical_inventory/static/src/css/dashboard.css"/>
+        </xpath>
+    </template>
+
+    <template id="assets_backend_xml" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <t t-call-assets="medical_inventory.assets_qweb"/>
+        </xpath>
+    </template>
+
+    <template id="assets_qweb">
+        <t t-call-assets="/medical_inventory/static/src/xml/dashboard.xml" t-js="false"/>
+    </template>
+</odoo>

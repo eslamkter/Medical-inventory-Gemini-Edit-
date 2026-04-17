@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+<t t-name="medical_inventory.StockView">
+<div class="o_stock_view">
+
+    <t t-if="state.loading">
+        <div class="o_sv_loading"><div class="o_sv_spinner"/><p>Loading inventory...</p></div>
+    </t>
+
+    <t t-if="state.error">
+        <div class="o_sv_loading">
+            <span style="font-size:40px">⚠️</span>
+            <p>Could not load stock data</p>
+            <button class="o_sv_btn_primary" t-on-click="loadData">Retry</button>
+        </div>
+    </t>
+
+    <t t-if="!state.loading and !state.error and state.data">
+
+        <!-- Top bar -->
+        <div class="o_sv_topbar">
+            <div class="o_sv_title">
+                <h1>📦 Current Stock</h1>
+                <span class="o_sv_subtitle">
+                    <t t-esc="state.data.total_products"/> products across
+                    <t t-esc="state.data.locations.length"/> locations
+                </span>
+            </div>
+            <div class="o_sv_topactions">
+                <button class="o_sv_btn_primary" t-on-click="() => this.navigate('action_stock_receive')">
+                    + Receive Stock
+                </button>
+                <button class="o_sv_btn_secondary" t-on-click="() => this.navigate('action_consumption_request')">
+                    + New Request
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary strips -->
+        <div class="o_sv_strips">
+            <div class="o_sv_strip o_strip_blue">
+                <span class="o_strip_val"><t t-esc="fmt(state.data.total_products)"/></span>
+                <span class="o_strip_lbl">Products</span>
+            </div>
+            <div class="o_sv_strip o_strip_teal">
+                <span class="o_strip_val"><t t-esc="fmt(state.data.total_qty)"/></span>
+                <span class="o_strip_lbl">Total Units</span>
+            </div>
+            <div class="o_sv_strip o_strip_green">
+                <span class="o_strip_val">$<t t-esc="fmtMoney(state.data.total_value)"/></span>
+                <span class="o_strip_lbl">Total Value</span>
+            </div>
+            <div class="o_sv_strip o_strip_purple">
+                <span class="o_strip_val"><t t-esc="state.data.locations.length"/></span>
+                <span class="o_strip_lbl">Locations</span>
+            </div>
+        </div>
+
+        <!-- Category pills -->
+        <div class="o_sv_cats">
+            <t t-foreach="state.data.categories" t-as="cat" t-key="cat.name">
+                <div class="o_sv_cat_pill">
+                    <span class="o_cat_name"><t t-esc="cat.name"/></span>
+                    <span class="o_cat_qty"><t t-esc="fmt(cat.qty)"/> units</span>
+                    <span class="o_cat_val">$<t t-esc="fmtMoney(cat.value)"/></span>
+                </div>
+            </t>
+        </div>
+
+        <!-- Toolbar: search + filters + view toggle -->
+        <div class="o_sv_toolbar">
+            <div class="o_sv_search_wrap">
+                <span class="o_sv_search_ico">🔍</span>
+                <input class="o_sv_search" type="text" placeholder="Search product, reference, category..."
+                       t-on-input="setSearch"/>
+            </div>
+            <select class="o_sv_select" t-on-change="setLocation">
+                <option value="all">All Locations</option>
+                <t t-foreach="state.data.locations" t-as="loc" t-key="loc.id">
+                    <option t-att-value="loc.id"><t t-esc="loc.name"/></option>
+                </t>
+            </select>
+            <select class="o_sv_select" t-on-change="setCategory">
+                <option value="all">All Categories</option>
+                <t t-foreach="allCategories" t-as="cat" t-key="cat">
+                    <option t-att-value="cat"><t t-esc="cat"/></option>
+                </t>
+            </select>
+            <div class="o_sv_view_toggle">
+                <button t-attf-class="o_sv_toggle_btn #{state.view === 'cards' ? 'active' : ''}"
+                        t-on-click="() => this.setView('cards')">⊞ Cards</button>
+                <button t-attf-class="o_sv_toggle_btn #{state.view === 'table' ? 'active' : ''}"
+                        t-on-click="() => this.setView('table')">☰ Table</button>
+            </div>
+        </div>
+
+        <!-- No results -->
+        <t t-if="filteredLocations.length === 0">
+            <div class="o_sv_empty">
+                <span style="font-size:48px">🔍</span>
+                <p>No products match your search</p>
+                <small>Try changing your filters</small>
+            </div>
+        </t>
+
+        <!-- CARDS VIEW -->
+        <t t-if="state.view === 'cards'">
+            <t t-foreach="filteredLocations" t-as="loc" t-key="loc.id">
+                <div class="o_sv_location_block">
+                    <div class="o_sv_loc_header">
+                        <div class="o_sv_loc_title">
+                            <span class="o_sv_loc_icon">📍</span>
+                            <span class="o_sv_loc_name"><t t-esc="loc.name"/></span>
+                        </div>
+                        <div class="o_sv_loc_meta">
+                            <span class="o_sv_loc_stat"><t t-esc="loc.product_count"/> products</span>
+                            <span class="o_sv_loc_stat o_stat_qty"><t t-esc="fmt(loc.total_qty)"/> units</span>
+                            <span class="o_sv_loc_stat o_stat_val">$<t t-esc="fmtMoney(loc.total_value)"/></span>
+                        </div>
+                    </div>
+                    <div class="o_sv_cards_grid">
+                        <t t-foreach="loc.products" t-as="prod" t-key="prod.id">
+                            <div t-attf-class="o_sv_card o_card_#{stockStatus(prod.qty)}">
+                                <div class="o_card_top">
+                                    <div class="o_card_cat"><t t-esc="prod.category"/></div>
+                                    <div t-attf-class="o_card_status o_status_#{stockStatus(prod.qty)}">
+                                        <t t-esc="stockLabel(prod.qty)"/>
+                                    </div>
+                                </div>
+                                <div class="o_card_name"><t t-esc="prod.name"/></div>
+                                <t t-if="prod.ref">
+                                    <div class="o_card_ref"># <t t-esc="prod.ref"/></div>
+                                </t>
+                                <div class="o_card_bottom">
+                                    <div class="o_card_qty">
+                                        <span class="o_qty_num"><t t-esc="fmt(prod.qty)"/></span>
+                                        <span class="o_qty_unit"><t t-esc="prod.unit"/></span>
+                                    </div>
+                                    <div class="o_card_val">$<t t-esc="fmtMoney(prod.value)"/></div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </t>
+
+        <!-- TABLE VIEW -->
+        <t t-if="state.view === 'table'">
+            <t t-foreach="filteredLocations" t-as="loc" t-key="loc.id">
+                <div class="o_sv_location_block">
+                    <div class="o_sv_loc_header">
+                        <div class="o_sv_loc_title">
+                            <span class="o_sv_loc_icon">📍</span>
+                            <span class="o_sv_loc_name"><t t-esc="loc.name"/></span>
+                        </div>
+                        <div class="o_sv_loc_meta">
+                            <span class="o_sv_loc_stat"><t t-esc="loc.product_count"/> products</span>
+                            <span class="o_sv_loc_stat o_stat_qty"><t t-esc="fmt(loc.total_qty)"/> units</span>
+                            <span class="o_sv_loc_stat o_stat_val">$<t t-esc="fmtMoney(loc.total_value)"/></span>
+                        </div>
+                    </div>
+                    <table class="o_sv_table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Reference</th>
+                                <th>Category</th>
+                                <th>Qty on Hand</th>
+                                <th>Unit</th>
+                                <th>Cost</th>
+                                <th>Total Value</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="loc.products" t-as="prod" t-key="prod.id">
+                                <tr t-attf-class="o_tr_#{stockStatus(prod.qty)}">
+                                    <td class="o_td_name"><t t-esc="prod.name"/></td>
+                                    <td class="o_td_ref"><t t-esc="prod.ref or '—'"/></td>
+                                    <td><t t-esc="prod.category"/></td>
+                                    <td class="o_td_qty"><t t-esc="fmt(prod.qty)"/></td>
+                                    <td><t t-esc="prod.unit"/></td>
+                                    <td class="o_td_num">$<t t-esc="fmtMoney(prod.cost)"/></td>
+                                    <td class="o_td_val">$<t t-esc="fmtMoney(prod.value)"/></td>
+                                    <td>
+                                        <span t-attf-class="o_tbl_badge o_tbadge_#{stockStatus(prod.qty)}">
+                                            <t t-esc="stockLabel(prod.qty)"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr class="o_tfoot">
+                                <td colspan="3"><strong>Total</strong></td>
+                                <td class="o_td_qty"><strong><t t-esc="fmt(loc.total_qty)"/></strong></td>
+                                <td colspan="2"></td>
+                                <td class="o_td_val"><strong>$<t t-esc="fmtMoney(loc.total_value)"/></strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </t>
+        </t>
+
+    </t>
+</div>
+</t>
+</templates>

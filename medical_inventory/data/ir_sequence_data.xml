@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_consumption_request" model="ir.sequence">
+            <field name="name">Medical Consumption Request</field>
+            <field name="code">medical.consumption.request</field>
+            <field name="prefix">MCR/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+        <record id="seq_stock_receive" model="ir.sequence">
+            <field name="name">Medical Stock Receipt</field>
+            <field name="code">medical.stock.receive</field>
+            <field name="prefix">MSR/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+    </data>
+</odoo>

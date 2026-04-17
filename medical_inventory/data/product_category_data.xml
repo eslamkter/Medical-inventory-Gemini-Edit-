@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="categ_medical_consumables" model="product.category">
+            <field name="name">Medical Consumables</field>
+        </record>
+        <record id="categ_medical_devices" model="product.category">
+            <field name="name">Medical Devices &amp; Equipment</field>
+        </record>
+        <record id="categ_office_supplies" model="product.category">
+            <field name="name">Office &amp; Admin Supplies</field>
+        </record>
+    </data>
+</odoo>
